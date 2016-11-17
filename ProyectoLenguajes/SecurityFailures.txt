@@ -1,4 +1,0 @@
-Security Failures: 
-
-
-<25:1> Classes that define an equals() method must also define a hashCode() method

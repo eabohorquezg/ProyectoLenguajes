@@ -14,32 +14,35 @@ public class MyVisitor<T> extends Java8BaseVisitor<T>{
     private static ArrayList<String> methodNames = new ArrayList<String>();
     private static HashMap<Integer, String> rules = new HashMap<>();
     private static PrintWriter reportFile = null;
+    private static String failureInformation = "";
     
     static{
-        rules.put(1, "Classes that define an equals() method must also define a hashCode() method");
+        rules.put(1, "MET09-J Classes that define an equals() method must also define a hashCode() method");
+        rules.put(2, "MET01-J Never use assertions to validate method arguments");
         //add rules
     }
     
-    public static void createFile(){
+    public static void generateFaultReport(){
         try {
-            reportFile = new PrintWriter(new FileWriter("SecurityFailures.txt",true));
-            reportFile.println("Security Failures: \n\n");            
+            reportFile = new PrintWriter(new FileWriter("SecurityFailures.txt",true));            
+            reportFile.println("Security Failures: \n\n");                        
+            reportFile.println(failureInformation);
+            reportFile.close();        
         } catch (IOException ex) {
             Logger.getLogger(MyVisitor.class.getName()).log(Level.SEVERE, null, ex);
         }         
     }
     
     @Override 
-    public T visitCompilationUnit(Java8Parser.CompilationUnitContext ctx) {                                        
-        createFile();
-        visitTypeDeclaration(ctx.typeDeclaration(0));
+    public T visitCompilationUnit(Java8Parser.CompilationUnitContext ctx) {                                                
+        visitTypeDeclaration(ctx.typeDeclaration(0));//declaracion de clase
         endOfClass(ctx);
+        generateFaultReport();
         return null;
     }
 
     public static void securityFailure( int line, int col, String info ){        
-        reportFile.println(String.format("<%d:%d> %s", line, col, info));       
-        reportFile.close();        
+        failureInformation += String.format("<%d:%d> %s \n", line, col, info);      
     }
     
     public void endOfClass( Java8Parser.CompilationUnitContext ctx ){
@@ -49,11 +52,21 @@ public class MyVisitor<T> extends Java8BaseVisitor<T>{
             securityFailure(line,column,rules.get(1));             
         }    
     }
-    
+   
     @Override 
-    public T visitMethodDeclarator(Java8Parser.MethodDeclaratorContext ctx) {                 
-        methodNames.add(ctx.Identifier().getText());            
+    public T visitAssertStatement(Java8Parser.AssertStatementContext ctx) { 
+        if( ctx.parent.getChild(0).getText().contains("assert") ){
+            int line = ctx.start.getLine();
+            int column = ctx.start.getCharPositionInLine();
+            securityFailure(line, column, rules.get(2));            
+        }              
         return visitChildren(ctx); 
     }
-            
+    
+    @Override 
+    public T visitMethodDeclarator(Java8Parser.MethodDeclaratorContext ctx) {        
+        methodNames.add(ctx.Identifier().getText());                              
+        return visitChildren(ctx); 
+    }
+    
 }
