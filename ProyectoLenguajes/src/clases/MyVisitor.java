@@ -19,6 +19,7 @@ public class MyVisitor<T> extends Java8BaseVisitor<T>{
     static{
         rules.put(1, "MET09-J Classes that define an equals() method must also define a hashCode() method");
         rules.put(2, "MET01-J Never use assertions to validate method arguments");
+        rules.put(3, "OBJ01-J Limit accessibility of fields");
         //add rules
     }
     
@@ -54,8 +55,8 @@ public class MyVisitor<T> extends Java8BaseVisitor<T>{
     }
    
     @Override 
-    public T visitAssertStatement(Java8Parser.AssertStatementContext ctx) { 
-        if( ctx.parent.getChild(0).getText().contains("assert") ){
+    public T visitAssertStatement(Java8Parser.AssertStatementContext ctx) {         
+        if( ctx.getChild(0).getText().contains("assert") ){
             int line = ctx.start.getLine();
             int column = ctx.start.getCharPositionInLine();
             securityFailure(line, column, rules.get(2));            
@@ -66,6 +67,16 @@ public class MyVisitor<T> extends Java8BaseVisitor<T>{
     @Override 
     public T visitMethodDeclarator(Java8Parser.MethodDeclaratorContext ctx) {        
         methodNames.add(ctx.Identifier().getText());                              
+        return visitChildren(ctx); 
+    }
+    
+    @Override 
+    public T visitFieldDeclaration(Java8Parser.FieldDeclarationContext ctx) { 
+        if( !ctx.getChild(0).getText().equals("private") ){
+            int line = ctx.start.getLine();
+            int column = ctx.start.getCharPositionInLine();
+            securityFailure(line, column, rules.get(3));            
+        }
         return visitChildren(ctx); 
     }
     

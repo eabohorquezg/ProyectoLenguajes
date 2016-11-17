@@ -7,10 +7,10 @@
 import java.util.HashMap;
 import java.util.Map;
 
-
-public final class CreditCard {
-    private final int number;
  
+public final class CreditCard{
+    public final int number;    
+
     public CreditCard(int number) {
         this.number = number;
     }
@@ -41,4 +41,8 @@ public static void main(String[] args) {
     System.out.println(m.get(new CreditCard(100))); 
     System.out.println(getAbsAdd(Integer.MIN_VALUE, -19));
   }
+
+    double amountMoney;
+    String brand;
+
 }
