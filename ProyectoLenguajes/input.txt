@@ -1,4 +1,4 @@
-/*
+/* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -11,7 +11,7 @@ import java.util.Map;
 public final class CreditCard{
     public final int number;    
     File file = new File("path");
-
+    
     public CreditCard(int number) {
         this.number = number;
     }
@@ -41,7 +41,10 @@ public static void main(String[] args) {
     m.put(new CreditCard(100), "4111111111111111");
     System.out.println(m.get(new CreditCard(100))); 
     System.out.println(getAbsAdd(Integer.MIN_VALUE, -19));       
+    String microchip = "AXB";
+    microchip.replace('A', 'C');    
     file.delete();   
+    microchip.concat("DHD");             
     }
 
     double amountMoney;
