@@ -1,6 +1,7 @@
 package View;
 
 import Model.CodeAnalyzer;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -16,6 +17,9 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
 
 /**
  *
@@ -32,7 +36,7 @@ public class GUICodeAnalyzer extends javax.swing.JFrame {
     public GUICodeAnalyzer() {        
         initComponents();
         this.setLocationRelativeTo(null);
-        this.setTitle("Analizador de Codigo");
+        this.setTitle("Detector");
         codeArea.setEnabled(true);
         listmodel = new DefaultListModel();
         resultList.setModel(listmodel);
@@ -62,7 +66,7 @@ public class GUICodeAnalyzer extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jLabel1.setText("Analizador de Codigo");
+        jLabel1.setText("Detector de vulnerabilidades de seguridad en codigo Java");
 
         jLabel2.setText("Resultados");
 
@@ -118,6 +122,11 @@ public class GUICodeAnalyzer extends javax.swing.JFrame {
             }
         });
 
+        resultList.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                resultListMouseClicked(evt);
+            }
+        });
         jScrollPane4.setViewportView(resultList);
 
         setJMenuBar(jMenuBar1);
@@ -130,9 +139,6 @@ public class GUICodeAnalyzer extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane4)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jLabel1))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2)
@@ -143,6 +149,10 @@ public class GUICodeAnalyzer extends javax.swing.JFrame {
                             .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 770, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 346, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(204, 204, 204))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -174,7 +184,7 @@ public class GUICodeAnalyzer extends javax.swing.JFrame {
     
     private void codeAreaKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_codeAreaKeyReleased
         // TODO add your handling code here:
-        if(evt.isControlDown() || evt.getKeyCode()==10 || evt.getKeyCode()==8 || evt.getKeyCode()==127){
+        if(evt.isControlDown()/* || evt.getKeyCode()==10 || evt.getKeyCode()==8 || evt.getKeyCode()==127*/){
             countRows(); 
         }
     }//GEN-LAST:event_codeAreaKeyReleased
@@ -223,6 +233,28 @@ public class GUICodeAnalyzer extends javax.swing.JFrame {
             Logger.getLogger(GUICodeAnalyzer.class.getName()).log(Level.SEVERE, null, ex);
         }        
     }//GEN-LAST:event_btnCodeAnalyzerActionPerformed
+
+    private void resultListMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_resultListMouseClicked
+        // TODO add your handling code here:
+        String text = resultList.getSelectedValue();
+        if( text.contains("<") ){
+            int line = Integer.parseInt(text.substring(1, text.indexOf(":")));                     
+            try {
+               codeArea.getHighlighter().removeAllHighlights();
+               lineCounter.getHighlighter().removeAllHighlights();
+               int startIndex = codeArea.getLineStartOffset(line-1);               
+               int endIndex = codeArea.getLineEndOffset(line-1);
+               int startIndex2 = lineCounter.getLineStartOffset(line-1);               
+               int endIndex2 = lineCounter.getLineEndOffset(line-1);
+               Highlighter.HighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);                    
+               codeArea.getHighlighter().addHighlight(startIndex, endIndex, painter);
+               lineCounter.getHighlighter().addHighlight(startIndex2, endIndex2, painter);
+            }catch (BadLocationException ex) {
+               Logger.getLogger(GUICodeAnalyzer.class.getName()).log(Level.SEVERE, null, ex);
+           }
+        }
+        
+    }//GEN-LAST:event_resultListMouseClicked
            
     /**
      * @param args the command line arguments
